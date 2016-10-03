@@ -1,61 +1,42 @@
 'use strict';
 
-var fetchUri = require('fetch').fetchUrl;
-
 module.exports = {
 
-    "handle": function(parameters){
-        var params = parameters;
+    "handle": function(request, assigner){
+        var params = Object.assign({}, request, {
+            headers: new Headers(request.headers)
+        });
 
-        params.payload = params.body;
 
         return new Promise(function(resolve, reject){
 
-            params.success = function(body, status, response){
-                resolve(formatResponse(response));
-            };
-
-            params.error = function(response){
-                reject(formatResponse(response));
-            };
-
-
-            fetchUri(parameters.uri, params);
+            fetch(new Request(params.uri, params))
+            .then(function(response){
+                response.text().then(function(text){
+                    resolve(assigner(formatResponse(response, text)));
+                    }
+                )
+            })
+            .catch(function(response){
+                reject(assigner(formatResponse(response)));
+            });
         });
     }
 };
 
 
-function formatResponse(response){
-
-    return {
-        "headers": response.responseHeaders,
+function formatResponse(response, text){
+    var result = {
+        "headers": {},
         "status": {
             "code": response.status,
             "message": response.statusText
         },
-        "body": response.responseText,
-        "data": formatBody(response)
+        "body": text
     };
+
+    response.headers.forEach( function(value, key) { result.headers[key] = value;} );
+
+    return result;
 }
-
-function formatBody(response){
-//    var contentType = response.getResponseHeader("Content-type");
-//    if (contentType && contentType.split(";")[0] === "application/json") {
-        return JSON.parse(response.responseText);
-//    }
-}
-
-function parseHeaders(headerSting){
-    var headers = {};
-    headerSting.split("\r\n").map( function(line) {
-        if(line.trim() !== ""){
-            line = line.split(":");
-            headers[line.shift().trim()] = line.join(":").trim();
-        }
-    });
-
-    return headers;
-}
-
 
