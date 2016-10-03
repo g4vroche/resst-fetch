@@ -1,6 +1,6 @@
 {
   "name": "resst-fetch",
-  "version": "1.0.1",
+  "version": "1.0.2",
   "description": "A backend to use fetch with resst",
   "main": "index.js",
   "scripts": {
@@ -17,6 +17,6 @@
   },
   "homepage": "https://github.com/g4vroche/resst-fetch#readme",
   "dependencies": {
-    "fetch": "^1.1.0"
+    "whatwg-fetch": "^1.0.0"
   }
 }
